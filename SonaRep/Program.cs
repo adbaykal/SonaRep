@@ -4,7 +4,11 @@ using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using NLog.Extensions.Logging;
 using SonaRep.Commands;
+using SonaRep.Helper;
+using SonaRep.Models;
+using SonaRep.Services;
 
 public class Program
 {
@@ -13,12 +17,20 @@ public class Program
         return await new HostBuilder()
             .ConfigureLogging((context, builder) =>
             {
-                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Trace);
+                builder.AddNLog("nlog.config");
             })
             .ConfigureServices((context, services) =>
             {
+                services.AddHttpClient();
                 services
                     .AddSingleton<IConsole>(PhysicalConsole.Singleton);
+                services
+                    .AddSingleton<ISonarService,SonarService>();
+                services
+                    .AddSingleton<ICsvHelper,CsvHelper>();
+                services
+                    .AddSingleton<UserProfileModel>();
             })
             .RunCommandLineApplicationAsync<SonarepCmd>(args);
     }

@@ -5,9 +5,10 @@ namespace SonaRep.Commands;
 
 [Command(Name = "sonarep", OptionsComparison = System.StringComparison.InvariantCultureIgnoreCase )]
 [VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
-/*[Subcommand(
+[Subcommand(
     typeof(LoginCmd),
-    typeof(ListTicketCmd))]*/
+    typeof(ReportCmd)
+    )]
 public class SonarepCmd : CommandBase
 {
     public SonarepCmd(IConsole console)

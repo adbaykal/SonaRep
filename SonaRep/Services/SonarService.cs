@@ -1,0 +1,106 @@
+using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
+using SonaRep.Models;
+using SonaRep.Services.Models;
+
+namespace SonaRep.Services;
+
+public class SonarService : ISonarService
+{
+    private readonly ILogger<SonarService> _logger;
+    private HttpClient client;
+
+    private readonly string BaseUrl = "https://sonarcloud.io/api/";
+    private static string defaultMetricKeys = "blocker_violations,code_smells,new_branch_coverage,new_coverage,coverage,critical_violations,duplicated_lines_density,effort_to_reach_maintainability_rating_a,new_maintainability_rating,major_violations,blocker_violations,security_hotspots,vulnerabilities,alert_status,reliability_rating,security_hotspots,security_rating,sqale_debt_ratio";
+    
+    public SonarService(
+        ILogger<SonarService> logger,
+        IHttpClientFactory httpClientFactory)
+    {
+        _logger = logger;
+        client = httpClientFactory.CreateClient();
+    }
+    public async Task<List<Favorite>?> GetFavoritesAsync(string token)
+    {
+        var httpRequestMessage = new HttpRequestMessage(
+            HttpMethod.Get,
+            BaseUrl + "favorites/search")
+        {
+            Headers =
+            {
+                {HeaderNames.Authorization, $"Basic {Base64Encode($"{token}:")}"},
+                {HeaderNames.Accept, "application/json" }
+            }
+        };
+     
+
+        var response = await client.SendAsync(httpRequestMessage);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Sonar Favorites List Service returned HttpResponse other than 200.");
+            _logger.LogError("StatusCode: {statusCode} Body: {body}", response.StatusCode, response.Content.ReadAsStringAsync());
+            return null;
+        }
+        else
+        {
+            var responseBodyStream = await response.Content.ReadAsStreamAsync();
+            var favList = await JsonSerializer.DeserializeAsync<List<Favorite>>(responseBodyStream);
+            return favList;
+        }
+        
+    }
+
+    public async Task<Component?> GetProjectDetailsAsync(string token, string projectName)
+    {
+        var responseBodyStream = await GetComponentDetailsAsync(token, projectName, defaultMetricKeys);
+        if (responseBodyStream == null) return null;
+        var project = await JsonSerializer.DeserializeAsync<Component>(responseBodyStream);
+        return project;
+    }
+
+    public async Task<string?> GetProjectDetailsAsync(string token, string projectName, string metricKeys)
+    {
+        var responseBodyStream = await GetComponentDetailsAsync(token, projectName, defaultMetricKeys);
+        if (responseBodyStream == null) return null;
+        StreamReader reader = new StreamReader(responseBodyStream);
+        var project = await reader.ReadToEndAsync();
+        return project;
+    }
+
+    private async Task<Stream?> GetComponentDetailsAsync(string token, string projectName, string metricKeys)
+    {
+        var httpRequestMessage = new HttpRequestMessage(
+            HttpMethod.Get,
+            BaseUrl + "measures/component?" + 
+            "component=" + projectName +
+            "&metricKeys=" + metricKeys)
+        {
+            Headers =
+            {
+                {HeaderNames.Authorization, $"Basic {Base64Encode($"{token}:")}"},
+                {HeaderNames.Accept, "application/json" }
+            }
+        };
+
+        var response = await client.SendAsync(httpRequestMessage);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Sonar Project Details Service returned HttpResponse other than 200.");
+            _logger.LogError("StatusCode: {statusCode} Body: {body}", response.StatusCode, response.Content.ReadAsStringAsync());
+            return null;
+        }
+        else
+        {
+            var responseBodyStream = await response.Content.ReadAsStreamAsync();
+            return responseBodyStream;
+        }
+    }
+    
+    private static string Base64Encode(string textToEncode)
+    {
+        byte[] textAsBytes = Encoding.UTF8.GetBytes(textToEncode);
+        return Convert.ToBase64String(textAsBytes);
+    }
+}
