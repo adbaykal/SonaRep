@@ -10,13 +10,14 @@ public class UserProfileModel
         get
         {
             if (!string.IsNullOrEmpty(token)) return token;
-            var text = File.ReadAllText($"{ProfileFolder}profile.json");
+            var text = File.ReadAllText(ProfileFilePath);
             if (!string.IsNullOrEmpty(text))
             {
+                //TODO: Set çağırıp duruyor, modeli değiştir.
                 var profile = JsonSerializer.Deserialize<UserProfileModel>(text);
                 if (profile != null)
                 {
-                    this.Token = profile.Token;
+                    this.token = profile.Token;
                 }
                     
             }

@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using McMaster.Extensions.CommandLineUtils;
+using SonaRep.Helper;
 using SonaRep.Models;
 using SonaRep.Services;
 using SonaRep.Services.Models;
@@ -22,18 +24,29 @@ public class ReportCmd : CommandBase
     [Option(CommandOptionType.SingleValue, LongName = "repo",ShortName = "r",Description = "Repo id for single repo reporting. Only works with single repotype.",
         ShowInHelpText = true)]
     public string? RepoId { get; set; }
+
+    [Option(CommandOptionType.SingleValue, LongName = "path", ShortName = "p", Description = "Path of the report file.",
+        ShowInHelpText = true)]
+    public string Path { get; set; } = "";
+    
+    [Option(CommandOptionType.SingleValue, LongName = "filename", ShortName = "f", Description = "Name of the report file.",
+        ShowInHelpText = true)]
+    public string FileName { get; set; } = "SonarepReport";
     
     private readonly UserProfileModel _userProfileModel;
     private readonly ISonarService _sonarService;
+    private readonly IReportExportService _exportService;
     
     public ReportCmd(
         IConsole console,
         UserProfileModel userProfileModel,
-        ISonarService sonarService)
+        ISonarService sonarService,
+        IReportExportService exportService)
     {
         _console = console;
         _userProfileModel = userProfileModel;
         _sonarService = sonarService;
+        _exportService = exportService;
     }
     
     protected override async Task<int> OnExecute(CommandLineApplication app)
@@ -48,9 +61,11 @@ public class ReportCmd : CommandBase
         {
             case "fav":
             {
+                
                 var favorites = await PopulateFavorites();
                 if (favorites == null)
                     return -1;
+                projectList = favorites;
                 break;
             }
             case "single" when string.IsNullOrEmpty(RepoId):
@@ -66,11 +81,16 @@ public class ReportCmd : CommandBase
         }
         
         //TODO: export report
+        var fullPath = "";
         switch (OutputType)
         {
             case "csv":
+                fullPath = _exportService.ExportAsCsv(projectList, System.IO.Path.Combine(Path,FileName + ".csv"));
+                _console.WriteLine($"Report created successfully! Path: {fullPath}");
                 break;
             case "json" :
+                fullPath = _exportService.ExportAsJson(projectList, System.IO.Path.Combine(Path,FileName + ".json"));
+                _console.WriteLine($"Report created successfully! Path: {fullPath}");
                 break;
             case "pdf":
                 break;

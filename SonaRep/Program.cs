@@ -30,6 +30,8 @@ public class Program
                 services
                     .AddSingleton<ICsvHelper,CsvHelper>();
                 services
+                    .AddSingleton<IReportExportService,ReportExportService>();
+                services
                     .AddSingleton<UserProfileModel>();
             })
             .RunCommandLineApplicationAsync<SonarepCmd>(args);

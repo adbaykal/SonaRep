@@ -22,7 +22,7 @@ public class Favorite
 public class Measure
 {
     public string metric { get; set; }
-    public double value { get; set; }
+    public string value { get; set; }
     public bool bestValue { get; set; }
 }
 

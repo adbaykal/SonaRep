@@ -46,8 +46,8 @@ public class SonarService : ISonarService
         else
         {
             var responseBodyStream = await response.Content.ReadAsStreamAsync();
-            var favList = await JsonSerializer.DeserializeAsync<List<Favorite>>(responseBodyStream);
-            return favList;
+            var favList = await JsonSerializer.DeserializeAsync<FavoriteListModel>(responseBodyStream);
+            return favList.favorites;
         }
         
     }
@@ -56,8 +56,11 @@ public class SonarService : ISonarService
     {
         var responseBodyStream = await GetComponentDetailsAsync(token, projectName, defaultMetricKeys);
         if (responseBodyStream == null) return null;
-        var project = await JsonSerializer.DeserializeAsync<Component>(responseBodyStream);
-        return project;
+        var reader = new StreamReader(responseBodyStream);
+        var responseBody = reader.ReadToEnd();
+        _logger.LogTrace(responseBody);
+        var project = JsonSerializer.Deserialize<ComponentDetailModel>(responseBody);
+        return project?.component;
     }
 
     public async Task<string?> GetProjectDetailsAsync(string token, string projectName, string metricKeys)
