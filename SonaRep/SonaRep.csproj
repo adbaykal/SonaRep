@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Handlebars.Net" Version="2.1.2" />
       <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.1" />
       <PackageReference Include="McMaster.Extensions.Hosting.CommandLine" Version="4.0.1" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.3.22175.4" />
@@ -22,6 +23,15 @@
 
     <ItemGroup>
       <None Update="nlog.config">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Template\measurePartial.html">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Template\projectPartial.html">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Template\template.html">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

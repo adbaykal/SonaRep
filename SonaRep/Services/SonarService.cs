@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using SonaRep.Models;
 using SonaRep.Services.Models;
+using MetricModel = SonaRep.Services.Models.MetricModel;
 
 namespace SonaRep.Services;
 
@@ -13,7 +14,7 @@ public class SonarService : ISonarService
     private HttpClient client;
 
     private readonly string BaseUrl = "https://sonarcloud.io/api/";
-    private static string defaultMetricKeys = "blocker_violations,code_smells,new_branch_coverage,new_coverage,coverage,critical_violations,duplicated_lines_density,effort_to_reach_maintainability_rating_a,new_maintainability_rating,major_violations,blocker_violations,security_hotspots,vulnerabilities,alert_status,reliability_rating,security_hotspots,security_rating,sqale_debt_ratio";
+    private static string defaultMetricKeys = "blocker_violations,code_smells,new_branch_coverage,new_coverage,coverage,critical_violations,duplicated_lines_density,effort_to_reach_maintainability_rating_a,new_maintainability_rating,major_violations,blocker_violations,security_hotspots,vulnerabilities,alert_status,reliability_rating,security_hotspots,security_rating,sqale_debt_ratio,sqale_rating";
     
     public SonarService(
         ILogger<SonarService> logger,
@@ -70,6 +71,35 @@ public class SonarService : ISonarService
         StreamReader reader = new StreamReader(responseBodyStream);
         var project = await reader.ReadToEndAsync();
         return project;
+    }
+
+    public async Task<MetricModel?> ListMetricsAsync(string token)
+    {
+        var httpRequestMessage = new HttpRequestMessage(
+            HttpMethod.Get,
+            BaseUrl + "metrics/search?ps=500")
+        {
+            Headers =
+            {
+                {HeaderNames.Authorization, $"Basic {Base64Encode($"{token}:")}"},
+                {HeaderNames.Accept, "application/json" }
+            }
+        };
+     
+
+        var response = await client.SendAsync(httpRequestMessage);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Sonar Favorites List Service returned HttpResponse other than 200.");
+            _logger.LogError("StatusCode: {statusCode} Body: {body}", response.StatusCode, response.Content.ReadAsStringAsync());
+            return null;
+        }
+        else
+        {
+            var responseBodyStream = await response.Content.ReadAsStreamAsync();
+            var favList = await JsonSerializer.DeserializeAsync<MetricModel>(responseBodyStream);
+            return favList;
+        }
     }
 
     private async Task<Stream?> GetComponentDetailsAsync(string token, string projectName, string metricKeys)

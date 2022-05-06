@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace SonaRep.Models;
 
@@ -13,11 +14,10 @@ public class UserProfileModel
             var text = File.ReadAllText(ProfileFilePath);
             if (!string.IsNullOrEmpty(text))
             {
-                //TODO: Set çağırıp duruyor, modeli değiştir.
-                var profile = JsonSerializer.Deserialize<UserProfileModel>(text);
-                if (profile != null)
+                dynamic profile = JsonNode.Parse(text);
+                if (profile is not null)
                 {
-                    this.token = profile.Token;
+                    this.token = profile["Token"].ToString();
                 }
                     
             }

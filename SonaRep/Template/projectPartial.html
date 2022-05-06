@@ -1,0 +1,28 @@
+<div class="card mt-2">
+    <h3 class="card-header">
+        {{name}}
+    </h3>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <h2><span class="badge bg-{{reliabilityRating.badgeClass}}">{{reliabilityRating.formattedValue}}</span> Reliability</h2>
+            </div>
+            <div class="col-md-4">
+                <h2><span class="badge bg-{{maintainabilityRating.badgeClass}}">{{maintainabilityRating.formattedValue}}</span> Maintainability</h2>
+            </div>
+            <div class="col-md-4">
+                <h2><span class="badge bg-{{securityRating.badgeClass}}">{{securityRating.formattedValue}}</span> Security</h2>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            {{#measures}}
+                {{> measure}}
+            {{/measures}}
+            
+        </div>
+        <div class="float-end">
+            <a class="btn btn-info" href="https://sonarcloud.io/summary/overall?id={{key}}" target="_blank" role="button">Go to Project</a>
+        </div>
+    </div>
+</div>

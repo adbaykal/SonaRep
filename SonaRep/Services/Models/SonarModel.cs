@@ -35,6 +35,29 @@ public class Component
     public List<Measure> measures { get; set; }
 }
 
+public class Metric
+{
+    public string id { get; set; }
+    public string key { get; set; }
+    public string type { get; set; }
+    public string name { get; set; }
+    public string description { get; set; }
+    public string domain { get; set; }
+    public int direction { get; set; }
+    public bool qualitative { get; set; }
+    public bool hidden { get; set; }
+    public int? decimalScale { get; set; }
+}
+
+public class MetricModel
+{
+    public List<Metric> metrics { get; set; }
+    public int total { get; set; }
+    public int p { get; set; }
+    public int ps { get; set; }
+}
+
+
 public class ComponentDetailModel
 {
     public Component component { get; set; }

@@ -9,4 +9,6 @@ public interface ISonarService
     public Task<Component?> GetProjectDetailsAsync(string token, string projectName);
     
     public Task<string?> GetProjectDetailsAsync(string token, string projectName, string metricKeys);
+    
+    public Task<MetricModel?> ListMetricsAsync(string token);
 }

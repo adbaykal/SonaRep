@@ -16,7 +16,7 @@ public class ReportCmd : CommandBase
     [Option(CommandOptionType.SingleValue, LongName = "repotype",ShortName = "rt", Description = "Type of Repositories",  ShowInHelpText = true)]  
     public string RepoType { get; set; }
 
-    [AllowedValues("csv","json","pdf")]
+    [AllowedValues("csv","json","html")]
     [Option(CommandOptionType.SingleValue, LongName = "outputtype",ShortName = "o",Description = "Type of output.",
          ShowInHelpText = true)]
     public string OutputType { get; set; } = "csv";
@@ -61,7 +61,7 @@ public class ReportCmd : CommandBase
         {
             case "fav":
             {
-                
+                _console.WriteLine("Fetching favorite projects from SonarCloud.");
                 var favorites = await PopulateFavorites();
                 if (favorites == null)
                     return -1;
@@ -73,6 +73,7 @@ public class ReportCmd : CommandBase
                 return -1;
             case "single":
             {
+                _console.WriteLine("Fetching the project from SonarCloud. RepoId: " + RepoId);
                 var component = await GetSingleRepoMetrics(RepoId);
                 if (component == null)
                     return -1;
@@ -80,7 +81,7 @@ public class ReportCmd : CommandBase
             }
         }
         
-        //TODO: export report
+        _console.WriteLine("Exporting report. OutputType: " + OutputType);
         var fullPath = "";
         switch (OutputType)
         {
@@ -92,7 +93,10 @@ public class ReportCmd : CommandBase
                 fullPath = _exportService.ExportAsJson(projectList, System.IO.Path.Combine(Path,FileName + ".json"));
                 _console.WriteLine($"Report created successfully! Path: {fullPath}");
                 break;
-            case "pdf":
+            case "html":
+                var metricDefs = await _sonarService.ListMetricsAsync(_userProfileModel.Token);
+                fullPath = _exportService.ExportAsHtml(projectList, System.IO.Path.Combine(Path,FileName + ".html"),metricDefs);
+                _console.WriteLine($"Report created successfully! Path: {fullPath}");
                 break;
         }
         
@@ -105,7 +109,7 @@ public class ReportCmd : CommandBase
 
         if (favList == null)
         {
-            _console.WriteLine("No favorite repo is found on sonarcloud.");
+            _console.WriteLine("No favorite repo is found on SonarCloud.");
             return null;
         }
 

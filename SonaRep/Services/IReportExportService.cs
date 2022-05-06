@@ -10,5 +10,5 @@ public interface IReportExportService
     
     public string ExportAsJson<T>(List<T> data, string path);
     
-    public string ExportAsPdf<T>(List<T> data, string path);
+    public string ExportAsHtml(List<Component> data, string path, MetricModel metricList);
 }
