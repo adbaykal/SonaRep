@@ -2,11 +2,9 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace SonaRep.Commands;
 
-public class CommandBase
+public abstract class CommandBase
 {
-    protected IConsole _console;
-    protected virtual Task<int> OnExecute(CommandLineApplication app)
-    {
-        throw new NotImplementedException();
-    }
+    protected IConsole? _console;
+    protected abstract Task<int> OnExecute(CommandLineApplication app);
+
 }

@@ -5,6 +5,7 @@ using SonaRep.Helper;
 using SonaRep.Models;
 using SonaRep.Services;
 using SonaRep.Services.Models;
+using MetricModel = SonaRep.Services.Models.MetricModel;
 
 namespace SonaRep.Commands;
 
@@ -16,7 +17,7 @@ public class ReportCmd : CommandBase
     [Option(CommandOptionType.SingleValue, LongName = "repotype",ShortName = "rt", Description = "Type of Repositories",  ShowInHelpText = true)]  
     public string RepoType { get; set; }
 
-    [AllowedValues("csv","json","html")]
+    [AllowedValues("csv","json","html","png","pdf")]
     [Option(CommandOptionType.SingleValue, LongName = "outputtype",ShortName = "o",Description = "Type of output.",
          ShowInHelpText = true)]
     public string OutputType { get; set; } = "csv";
@@ -38,7 +39,7 @@ public class ReportCmd : CommandBase
     private readonly IReportExportService _exportService;
     
     public ReportCmd(
-        IConsole console,
+        IConsole? console,
         UserProfileModel userProfileModel,
         ISonarService sonarService,
         IReportExportService exportService)
@@ -69,7 +70,7 @@ public class ReportCmd : CommandBase
                 break;
             }
             case "single" when string.IsNullOrEmpty(RepoId):
-                _console.WriteLine("You need to specify RepoName for single repotype.");
+                _console.WriteLine("You need to specify RepoId for single repotype.");
                 return -1;
             case "single":
             {
@@ -77,12 +78,14 @@ public class ReportCmd : CommandBase
                 var component = await GetSingleRepoMetrics(RepoId);
                 if (component == null)
                     return -1;
+                projectList.Add(component);
                 break;
             }
         }
         
         _console.WriteLine("Exporting report. OutputType: " + OutputType);
         var fullPath = "";
+        MetricModel? metricDefs;
         switch (OutputType)
         {
             case "csv":
@@ -94,8 +97,18 @@ public class ReportCmd : CommandBase
                 _console.WriteLine($"Report created successfully! Path: {fullPath}");
                 break;
             case "html":
-                var metricDefs = await _sonarService.ListMetricsAsync(_userProfileModel.Token);
+                metricDefs = await _sonarService.ListMetricsAsync(_userProfileModel.Token);
                 fullPath = _exportService.ExportAsHtml(projectList, System.IO.Path.Combine(Path,FileName + ".html"),metricDefs);
+                _console.WriteLine($"Report created successfully! Path: {fullPath}");
+                break;
+            case "png":
+                metricDefs = await _sonarService.ListMetricsAsync(_userProfileModel.Token);
+                fullPath = await _exportService.ExportAsPng(projectList, System.IO.Path.Combine(Path,FileName + ".png"),metricDefs);
+                _console.WriteLine($"Report created successfully! Path: {fullPath}");
+                break;
+            case "pdf":
+                metricDefs = await _sonarService.ListMetricsAsync(_userProfileModel.Token);
+                fullPath = await _exportService.ExportAsPdf(projectList, System.IO.Path.Combine(Path,FileName + ".pdf"),metricDefs);
                 _console.WriteLine($"Report created successfully! Path: {fullPath}");
                 break;
         }

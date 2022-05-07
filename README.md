@@ -1,6 +1,6 @@
-##Usage
+## Usage
 
-###Login
+### Login
 
 ```shell
 sonrep login --token <YOURAPIKEY>
@@ -14,6 +14,9 @@ sonrep report --repotype fav --outputtype json
 
 ```shell
 sonrep report --repotype fav --outputtype csv
+```
+```shell
+sonrep report --repotype fav --outputtype html
 ```
 
 ```shell

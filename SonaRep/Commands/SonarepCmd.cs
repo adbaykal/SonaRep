@@ -11,7 +11,7 @@ namespace SonaRep.Commands;
     )]
 public class SonarepCmd : CommandBase
 {
-    public SonarepCmd(IConsole console)
+    public SonarepCmd(IConsole? console)
     {
         _console = console;
     }

@@ -14,7 +14,7 @@ public class LoginCmd : CommandBase
     private UserProfileModel _userProfileModel;
     
     public LoginCmd(
-        IConsole console,
+        IConsole? console,
         UserProfileModel userProfileModel)
     {
         _console = console;

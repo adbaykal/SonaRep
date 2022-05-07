@@ -1,6 +1,9 @@
 using System.Data;
 using System.Text.Json;
 using HandlebarsDotNet;
+using PuppeteerSharp;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
 using SonaRep.Helper;
 using SonaRep.Models;
 using SonaRep.Services.Models;
@@ -13,15 +16,9 @@ public class ReportExportService: IReportExportService
     private readonly ICsvHelper _csvHelper;
     
     public ReportExportService(
-        ICsvHelper csvHelper,
-        ISonarService sonarService)
+        ICsvHelper csvHelper)
     {
         _csvHelper = csvHelper;
-    }
-    public string ExportAsCsv<T>(List<T> data, string path)
-    {
-        _csvHelper.SaveToCsv(data,path);
-        return path;
     }
 
     public string ExportAsCsv(List<Component> data, string path)
@@ -130,6 +127,48 @@ public class ReportExportService: IReportExportService
         return path;
     }
 
+    public async Task<string> ExportAsPng(List<Component> data, string path, Models.MetricModel metricList)
+    {
+        var htmlPath = ExportAsHtml(data, path.Replace(".png",".html"), metricList);
+        
+        await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+        await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions {Headless = true, DefaultViewport = new ViewPortOptions(){Width = 800,Height = 600}});
+        await using var page = await browser.NewPageAsync();
+        await page.SetContentAsync(File.ReadAllText(htmlPath),new NavigationOptions
+        {
+            Timeout = 0,
+            WaitUntil = new[] {WaitUntilNavigation.Networkidle0},
+            Referer = null 
+        });
+        await page.ScreenshotAsync(path, new ScreenshotOptions(){FullPage = true});
+
+        return path;
+    }
+
+    public async Task<string> ExportAsPdf(List<Component> data, string path, Models.MetricModel metricList)
+    {
+        var pngPath = await ExportAsPng(data, path.Replace(".pdf",".png"), metricList);
+        
+        Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.ContinuousSize(PageSizes.A4.Width);
+                    page.Background(Colors.White);
+                   
+                    page.Content()
+                        .Column(x =>
+                        {
+                            x.Item().Image(pngPath);
+                        });
+        
+                });
+            })
+            .GeneratePdf(path);
+
+        return path;
+    }
+
     private Dictionary<string, MetricModel> ratingMatch = new()
     {
         {"1.0", new MetricModel(){value = "A",badgeClass= "success"}},
@@ -145,8 +184,8 @@ public class ReportExportService: IReportExportService
         switch (model.type)
         {
             case "RATING":
-                model.badgeClass = model.value!= null?ratingMatch[model.value].badgeClass:"secondary";
-                model.formattedValue = model.value!= null?ratingMatch[model.value].value:"";
+                model.badgeClass = !string.IsNullOrEmpty(model.value)?ratingMatch[model.value].badgeClass:"secondary";
+                model.formattedValue = !string.IsNullOrEmpty(model.value)?ratingMatch[model.value].value:"";
                 break;
             case "PERCENT":
                 model.badgeClass = "secondary";
