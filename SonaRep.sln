@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonaRep", "SonaRep\SonaRep.csproj", "{183A69D9-8076-4901-8D5A-41083F2DC773}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonaRep.Test", "SonaRep.Test\SonaRep.Test.csproj", "{AB1399B8-0E40-4B15-B202-1F67055B225C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{183A69D9-8076-4901-8D5A-41083F2DC773}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{183A69D9-8076-4901-8D5A-41083F2DC773}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{183A69D9-8076-4901-8D5A-41083F2DC773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB1399B8-0E40-4B15-B202-1F67055B225C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB1399B8-0E40-4B15-B202-1F67055B225C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB1399B8-0E40-4B15-B202-1F67055B225C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB1399B8-0E40-4B15-B202-1F67055B225C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
