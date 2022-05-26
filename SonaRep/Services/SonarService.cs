@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
-using SonaRep.Models;
 using SonaRep.Services.Models;
 using MetricModel = SonaRep.Services.Models.MetricModel;
 
